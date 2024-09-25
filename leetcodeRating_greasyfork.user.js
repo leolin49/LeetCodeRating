@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LeetCodeRating｜显示力扣周赛难度分
 // @namespace    https://github.com/zhang-wangz
-// @version      2.4.1
+// @version      2.4.2
 // @license      MIT
 // @description  LeetCodeRating 力扣周赛分数显现，支持所有页面评分显示
 // @author       小东是个阳光蛋(力扣名)
@@ -178,6 +178,7 @@
 // @note         2024-07-31 2.3.10 2.3.1补丁 修复讨论区如果没有关注讨论发布者或者讨论发布者没有携带徽章的情况下无法触发observer监听导致不能添加ac情况的bug, 拓展ac显示范围至讨论区发布讨论时的预览和题目页发布讨论，详细可以自己测试体验~
 // @note         2024-07-31 2.4.0 2.3.1补丁 修复2.3.10的题目页拓展之后没有考虑lc需要时间请求后台刷新a标签的问题造成新增加题目页的识别错误bug
 // @note         2024-08-16 2.4.1 上线新功能<每天最多只更新一次>，勾选后如果有更新，最多只会弹框一次，更新之后剩余如果再有更新会在第二天才弹窗
+// @note         2024-09-25 2.4.2 增加代码编辑器自定义字体的功能
 // ==/UserScript==
 
 (async function () {
@@ -453,6 +454,7 @@
             ['switchpbstatusLocation', 'switchpbstatusLocation function', '题目显示完成状态(位置改为左方)', false, true],
             ['switchpbstatusBtn', 'pbstatusBtn function', '讨论区和题目页添加同步题目状态按钮', true, true],
             ['switchperson', 'person function', '纸片人', false, true],
+			['switchfont', 'font function', '自定义编辑器字体', false, true],
         ], menu_ID = [], menu_ID_Content = [];
         for (const element of menu_ALL){ // 如果读取到的值为 null 就写入默认值
             if (GM_getValue(element[0]) == null){GM_setValue(element[0], element[3])};
@@ -2694,6 +2696,45 @@ if (GM_getValue("switchperson")) {
         // console.log(hc.content)
     }
     setTimeout(getkoto, 5000);
+}
+
+if (GM_getValue("switchfont")) {
+	let whetherSolution = location.href.match(pbUrl);
+	if (!whetherSolution) {
+		return;
+	}
+
+    // 目标元素
+    let targetDivs;
+
+    // 更改字体
+    function changeFont() {
+        targetDivs.forEach(function(div) {
+            div.style.fontFamily = 'Fira Code';
+        });
+    }
+
+    // 监听页面的动态变化
+    let observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                targetDivs = document.querySelectorAll('.view-lines.monaco-mouse-cursor-text');
+                changeFont();
+            }
+        });
+    });
+
+    // 配置观察器选项
+    let config = { childList: true, subtree: true };
+
+    // 选择需要观察变动的节点
+    let targetNode = document.body;
+
+    // 观察目标节点
+    observer.observe(targetNode, config);
+
+    // 页面加载完成后立即执行
+    changeFont();
 }
 
 })();
